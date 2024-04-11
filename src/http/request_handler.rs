@@ -28,14 +28,10 @@ pub const API_URL_PREFIX: &str = "/api";
 pub fn graphiql(req: &Request<Body>) -> Result<Response<Body>> {
     let query = req.uri().query();
     let endpoint = "/graphql";
-    let endpoint = if let Some(query) = query {
-        if query.is_empty() {
-            Cow::Borrowed(endpoint)
-        } else {
-            Cow::Owned(format!("{}?{}", endpoint, query))
-        }
-    } else {
-        Cow::Borrowed(endpoint)
+    let endpoint = match query {
+        Some(q) if q.is_empty() => Cow::Borrowed(endpoint),
+        Some(q) => Cow::Owned(format!("{}?{}", endpoint, q)),
+        None => Cow::Borrowed(endpoint),
     };
 
     Ok(Response::new(Body::from(playground_source(
